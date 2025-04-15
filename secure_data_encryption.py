@@ -100,7 +100,7 @@ if st.session_state.page == "Home":
                     del stored_data[data_id]
                     save_data(stored_data)
                     st.success(f"{data_id} deleted successfully.")
-                    st.experimental_rerun()
+                    st.rerun()
     else:
         st.info("No data stored yet.")
 
@@ -157,7 +157,7 @@ elif st.session_state.page == "Login":
                 st.session_state.failed_attempts = 0
                 st.session_state.logged_in = True
                 st.session_state.page = "Home"
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("❌ Incorrect password.")
 
