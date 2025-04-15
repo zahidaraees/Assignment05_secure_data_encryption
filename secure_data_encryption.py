@@ -13,10 +13,23 @@ import os
 # === CONFIG ===
 MASTER_PASSWORD = "admin123"
 DATA_FILE = "data_store.json"
-fernet_key = Fernet.generate_key()
+KEY_FILE = "fernet_key.key"
+
+# === GET/CREATE FERNET KEY ===
+def get_or_create_key():
+    if os.path.exists(KEY_FILE):
+        with open(KEY_FILE, "rb") as f:
+            return f.read()
+    else:
+        key = Fernet.generate_key()
+        with open(KEY_FILE, "wb") as f:
+            f.write(key)
+        return key
+
+fernet_key = get_or_create_key()
 cipher = Fernet(fernet_key)
 
-# === DATA HANDLING ===
+# === LOAD/SAVE DATA ===
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
@@ -29,7 +42,7 @@ def save_data(data):
 
 stored_data = load_data()
 
-# === HASHING & ENCRYPTION ===
+# === ENCRYPTION & HASHING ===
 def hash_passkey(passkey):
     return hashlib.sha256(passkey.encode()).hexdigest()
 
@@ -40,9 +53,13 @@ def encrypt_data(data, passkey):
 
 def decrypt_data(encrypted_text, passkey, stored_hash):
     if hash_passkey(passkey) == stored_hash:
-        decrypted = cipher.decrypt(encrypted_text.encode()).decode()
-        st.session_state.failed_attempts = 0
-        return decrypted
+        try:
+            decrypted = cipher.decrypt(encrypted_text.encode()).decode()
+            st.session_state.failed_attempts = 0
+            return decrypted
+        except:
+            st.error("❌ Decryption failed. Possibly corrupted or invalid key.")
+            return None
     else:
         st.session_state.failed_attempts += 1
         return None
@@ -60,7 +77,6 @@ st.sidebar.title("🔐 Navigation")
 pages = ["Home", "Store Data", "Retrieve Data", "Login"]
 selected = st.sidebar.selectbox("Go to", pages)
 
-# Lock user out after 3 failed attempts
 if st.session_state.failed_attempts >= 3:
     st.session_state.logged_in = False
     st.session_state.page = "Login"
@@ -123,7 +139,7 @@ elif st.session_state.page == "Retrieve Data":
                 st.markdown("### 🔍 Decrypted Data:")
                 st.code(decrypted, language="text")
             else:
-                st.error("❌ Incorrect passkey.")
+                st.error("❌ Incorrect passkey or corrupted data.")
         else:
             st.error("❌ Data ID not found.")
     st.warning(f"Attempts remaining: {3 - st.session_state.failed_attempts}")
@@ -147,4 +163,4 @@ elif st.session_state.page == "Login":
 
 # === FOOTER ===
 st.markdown("---")
-st.caption("🔐 Secure Data Encryption App | Assignment 05 – by Zahida Raees")
+st.caption("🔐 Secure Data Encryption App | Assignment 05 – Panaverse")
