@@ -4,8 +4,8 @@ Assignment 6 as per class.
 Secure Data Encryption Application with streamlit
 
 """
-import streamlit as st
-from cryptography.fernet import Fernet
+import streamlit as st # Streamlit UI is for interaction.
+from cryptography.fernet import Fernet  # Fernet encryption is basically symmetric encryption.
 import hashlib
 import json
 import os
@@ -163,4 +163,4 @@ elif st.session_state.page == "Login":
 
 # === FOOTER ===
 st.markdown("---")
-st.caption("🔐 Secure Data Encryption App | Assignment 05 – Panaverse")
+st.caption("🔐 Secure Data Encryption App | Assignment 05 – by Zahida Raees")
